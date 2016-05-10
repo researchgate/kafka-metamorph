@@ -13,10 +13,16 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'net.researchgate.release'
 
     repositories {
         jcenter()
     }
+
+    release {
+        tagTemplate = '$name-$version'
+    }
+
     dependencies {
         testCompile 'junit:junit:4.12'
     }
@@ -24,8 +30,8 @@ subprojects {
 
 project(':metamorph-kafka-08') {
     dependencies {
-        compile(project(':metamorph-common'))
-        compile('org.apache.kafka:kafka_2.10:0.8.2.2')
+        compile project(':metamorph-common')
+        compile 'org.apache.kafka:kafka_2.10:0.8.2.2'
     }
 }
 
