@@ -4,11 +4,12 @@ buildscript {
     }
     dependencies {
         classpath 'net.researchgate:gradle-release:2.3.5'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
     }
 }
 
 plugins {
-    id 'com.jfrog.bintray' version '1.5'
+    id 'net.researchgate.release' version '2.3.5'
 }
 
 allprojects {
@@ -18,7 +19,6 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
-    apply plugin: 'net.researchgate.release'
     apply plugin: 'com.jfrog.bintray'
 
     sourceCompatibility = 1.7
@@ -26,10 +26,6 @@ subprojects {
 
     repositories {
         jcenter()
-    }
-
-    release {
-        tagTemplate = '$name-$version'
     }
 
     dependencies {
@@ -74,4 +70,8 @@ project(':metamorph-kafka-08') {
         compile 'org.apache.kafka:kafka_2.10:0.8.2.2'
     }
 }
+
+task build {}
+
+beforeReleaseBuild.dependsOn subprojects.install
 
