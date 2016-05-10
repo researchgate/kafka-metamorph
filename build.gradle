@@ -1,35 +1,31 @@
-plugins {
-    id 'net.researchgate.release' version '2.3.5'
-    id 'idea'
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'net.researchgate:gradle-release:2.3.5'
+    }
 }
 
 allprojects {
+    apply plugin: 'idea'
+}
+
+subprojects {
     apply plugin: 'java'
 
     repositories {
-        mavenCentral()
+        jcenter()
     }
-
     dependencies {
         testCompile 'junit:junit:4.12'
     }
+}
 
-    release {
-        tagTemplate = '$name-$version'
-    }
-
-    task sourcesJar(type: Jar, dependsOn: classes) {
-        classifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = 'javadoc'
-        from javadoc.destinationDir
-    }
-
-    artifacts {
-        archives sourcesJar, javadocJar
+project(':metamorph-kafka-08') {
+    dependencies {
+        compile(project(':metamorph-common'))
+        compile('org.apache.kafka:kafka_2.10:0.8.2.2')
     }
 }
 

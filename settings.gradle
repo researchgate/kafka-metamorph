@@ -1,2 +1,3 @@
 rootProject.name = "kafka-metamorph"
 include 'metamorph-common'
+include 'metamorph-kafka-08'
