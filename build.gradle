@@ -7,6 +7,10 @@ buildscript {
     }
 }
 
+plugins {
+    id 'com.jfrog.bintray' version '1.5'
+}
+
 allprojects {
     apply plugin: 'idea'
 }
@@ -14,6 +18,9 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'net.researchgate.release'
+
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
 
     repositories {
         jcenter()
@@ -25,6 +32,37 @@ subprojects {
 
     dependencies {
         testCompile 'junit:junit:4.12'
+    }
+
+    bintray {
+        dryRun = false // Whether to run this as dry-run, without deploying
+        publish = false //If version should be auto published after an upload
+
+        user = project.hasProperty('bintrayUser') ? bintrayUser : ''
+        key = project.hasProperty('bintrayApiKey') ? bintrayApiKey : ''
+        configurations = ['archives']
+        pkg {
+            name = 'kafka-metamorph'
+            repo = 'maven'
+            userOrg = 'researchgate'
+            licenses = ['Apache-2.0']
+            vcsUrl = 'https://github.com/researchgate/kafka-metamorph.git'
+            issueTrackerUrl = 'https://github.com/researchgate/kafka-metamorph/issues'
+        }
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives sourcesJar, javadocJar
     }
 }
 
