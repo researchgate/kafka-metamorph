@@ -68,6 +68,9 @@ project(':metamorph-kafka-08') {
     dependencies {
         compile project(':metamorph-common')
         compile 'org.apache.kafka:kafka_2.10:0.8.2.2'
+
+        testCompile 'org.apache.kafka:kafka_2.10:0.8.2.2:test'
+        testCompile 'org.apache.kafka:kafka-clients:0.8.2.2'
     }
 }
 
