@@ -13,7 +13,6 @@ import net.researchgate.kafka.metamorph.exceptions.PartitionConsumerException;
 import net.researchgate.kafka.metamorph.kafka08.exceptions.NoBrokerAvailableException;
 import net.researchgate.kafka.metamorph.kafka08.exceptions.OffsetFetchException;
 import net.researchgate.kafka.metamorph.kafka08.exceptions.PartitionNotAvailableException;
-import sun.plugin.dom.exception.InvalidStateException;
 
 import java.util.*;
 
@@ -88,7 +87,7 @@ public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
 
     private void ensureAssignedAndNotClosed() {
         if (partitionConsumer == null || isClosed) {
-            throw new InvalidStateException("Consumer is not assigned to any partitions or connection has been already closed.");
+            throw new IllegalStateException("Consumer is not assigned to any partitions or connection has been already closed.");
         }
     }
 
