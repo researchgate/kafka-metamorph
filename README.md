@@ -1,6 +1,8 @@
 # kafka-metamorph
 Backwards compatible Kafka consumer for selective partition consumption and explicit offset control
 
+[![Build Status](https://travis-ci.org/researchgate/kafka-metamorph.svg?branch=master)](https://travis-ci.org/researchgate/kafka-metamorph)
+
 ## Background
 
 ### TL;DR
