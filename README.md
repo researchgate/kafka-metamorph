@@ -12,20 +12,20 @@ See also https://xkcd.com/927/
 ### The old fashioned way
 
 Before the introduction of version 0.9.0 Apache Kafka provided two consumer interfaces,
-the[SimpleConsumer API](http://kafka.apache.org/082/documentation.html#simpleconsumerapi)and the[high-level Consumer API](http://kafka.apache.org/082/documentation.html#highlevelconsumerapi).
+the [SimpleConsumer API](http://kafka.apache.org/082/documentation.html#simpleconsumerapi) and the [high-level Consumer API](http://kafka.apache.org/082/documentation.html#highlevelconsumerapi).
 
 While the high-level consumer provided a convenient interface and also took care of offset management, it had a major drawback:
 it did not allow explicit offset control (e.g. no possibility to re-process messages) and also it was not possible to consume
 only from a subset from partitions.
 
 The SimpleConsumer provided this functionality but in order to use this consumer properly it was neccessary to create a
-lot of boilerplate code for error handling and partition faults (see[official Kafka 0.8.0 SimpleConsumer example](https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+SimpleConsumer+Example)).
+lot of boilerplate code for error handling and partition faults (see [official Kafka 0.8.0 SimpleConsumer example](https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+SimpleConsumer+Example)).
 
 Unfortunately both consumer APIs were not compatible and it was rather tedious operation to replace one implementation with the other.
 
 ### Brave new world - Kafka 0.9.0
 
-With the release of Kafka 0.9.0 a[new unified consumer API](http://kafka.apache.org/090/documentation.html#consumerapi)was introduced which addressed the issues described above.
+With the release of Kafka 0.9.0 a [new unified consumer API](http://kafka.apache.org/090/documentation.html#consumerapi) was introduced which addressed the issues described above.
 This new interface combined the automatic offset management while still providing means to bind only to a selection of partitions
 and allowed external offset control.
 
