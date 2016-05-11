@@ -28,7 +28,7 @@ public class Kafka08PartitionConsumerTest {
     }
 
     @Test
-    public void testPartitionDiscovery() throws PartitionConsumerException {
+    public void testPartitionDiscoveryOnePartition() throws PartitionConsumerException {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
 
@@ -38,5 +38,19 @@ public class Kafka08PartitionConsumerTest {
         Collection<TopicPartition> partitions = consumer.partitionsFor(topic);
         Assert.assertEquals(1, partitions.size());
         Assert.assertEquals(0, ((TopicPartition) partitions.toArray()[0]).partition());
+    }
+
+    @Test
+    public void testPartitionDiscoveryMultiplePartitions() throws PartitionConsumerException {
+        final String topic = "test_topic";
+        context.createTopic(topic, 10);
+
+        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
+        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig);
+
+        Collection<TopicPartition> partitions = consumer.partitionsFor(topic);
+        Assert.assertEquals(10, partitions.size());
+        Assert.assertTrue(partitions.contains(new TopicPartition(topic, 0)));
+        Assert.assertTrue(partitions.contains(new TopicPartition(topic, 9)));
     }
 }
