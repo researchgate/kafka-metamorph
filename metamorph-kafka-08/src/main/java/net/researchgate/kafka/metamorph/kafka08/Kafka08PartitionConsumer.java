@@ -10,6 +10,12 @@ import java.util.List;
 
 public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
 
+    private final Kafka08PartitionConsumerConfig consumerConfig;
+
+    public Kafka08PartitionConsumer(Kafka08PartitionConsumerConfig consumerConfig) {
+        this.consumerConfig = consumerConfig;
+    }
+
     @Override
     public Collection<TopicPartition> partitionsFor(String topic) throws PartitionConsumerException {
         return null;
