@@ -21,7 +21,7 @@ it did not allow explicit offset control (e.g. no possibility to re-process mess
 only from a subset from partitions.
 
 The SimpleConsumer provided this functionality but in order to use this consumer properly it was neccessary to create a
-lot of boilerplate code for error handling and partition faults (see [official Kafka 0.8.0 SimpleConsumer example](https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+SimpleConsumer+Example)).
+lot of boilerplate code for error handling and for dealing with broker leader changes (see [official Kafka 0.8.0 SimpleConsumer example](https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+SimpleConsumer+Example)).
 
 Unfortunately both consumer APIs were not compatible and it was rather tedious operation to replace one implementation with the other.
 
