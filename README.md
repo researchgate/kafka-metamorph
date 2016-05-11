@@ -3,6 +3,12 @@ Backwards compatible Kafka consumer for selective partition consumption and expl
 
 ## Background
 
+### TL;DR
+
+With the introduction of Kafka 0.9.0 there are now 3 incompatible consumer interfaces and this project tries to unify them (and provide a consistent API which can be used with several Kafka versions).
+
+See also https://xkcd.com/927/
+
 ### The old fashioned way
 
 Before the introduction of version 0.9.0 Apache Kafka provided two consumer interfaces,
@@ -38,9 +44,3 @@ need to refactor your codebase later or you need to wait until your brokers can 
 
 This is the part in which kafka-metamorph comes into play. By providing one unified interface which can be
 used with older Kafka versions you can implement your use-case today and worry about broker updates later. Yay!
-
-#### TL;DR
-
-With the introduction of Kafka 0.9.0 there are now 3 incompatible consumer interfaces and this project tries to unify them again (and provide a consistent API which can be used with several Kafka versions).
-
-See also https://xkcd.com/927/
