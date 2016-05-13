@@ -19,7 +19,6 @@ import net.researchgate.kafka.metamorph.exceptions.PartitionConsumerException;
 import net.researchgate.kafka.metamorph.kafka08.exceptions.NoBrokerAvailableException;
 import net.researchgate.kafka.metamorph.kafka08.exceptions.OffsetFetchException;
 import net.researchgate.kafka.metamorph.kafka08.exceptions.PartitionNotAvailableException;
-import net.researchgate.kafka.metamorph.kafka08.internals.PartitionConsumerRecordTransformer;
 
 import java.util.*;
 

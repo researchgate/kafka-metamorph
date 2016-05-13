@@ -1,4 +1,4 @@
-package net.researchgate.kafka.metamorph.kafka08.internals;
+package net.researchgate.kafka.metamorph.kafka08;
 
 import kafka.message.Message;
 import kafka.message.MessageAndOffset;
@@ -8,7 +8,7 @@ import net.researchgate.kafka.metamorph.TopicPartition;
 
 import java.nio.ByteBuffer;
 
-public class PartitionConsumerRecordTransformer<K,V> {
+class PartitionConsumerRecordTransformer<K,V> {
 
     private final Decoder<K> keyDecoder;
     private final Decoder<V> valueDecoder;
