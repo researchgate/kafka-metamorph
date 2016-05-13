@@ -209,4 +209,49 @@ public class Kafka08PartitionConsumerTest {
         Assert.assertEquals(6708, records.get(0).offset());
         Assert.assertEquals(6999, records.get(records.size() - 1).offset());
     }
+
+    @Test
+    public void testPollTailing() throws Exception {
+        final String topic = "test_topic";
+        context.createTopic(topic, 1);
+
+        final KafkaProducer<String, String> producer = context.createProducer();
+
+        Thread producerThread = new Thread() {
+            public void run() {
+                try {
+                    Thread.sleep(10);
+
+                    List<Future<RecordMetadata>> futures = new ArrayList<>();
+                    for (int i = 0; i < 500; i++) {
+                        Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, "test-key-" + i, "test-value"));
+                        futures.add(future);
+                    }
+
+                    for (Future f : futures) {
+                        f.get();
+                    }
+                } catch(Exception e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    producer.close();
+                }
+
+            }
+        };
+
+        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
+        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+
+        consumer.assign(new TopicPartition(topic, 0));
+
+        List<PartitionConsumerRecord<String,String>> records = consumer.poll(10);
+        Assert.assertEquals(0, records.size());
+
+        producerThread.start();
+        records = consumer.poll(300);
+        producerThread.join();
+
+        Assert.assertEquals(500, records.size());
+    }
 }

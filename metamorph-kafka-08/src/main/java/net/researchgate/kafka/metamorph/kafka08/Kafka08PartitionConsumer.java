@@ -129,6 +129,7 @@ public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
                 .clientId(generateClientId())
                 .addFetch(assignedTopicPartition.topic(), assignedTopicPartition.partition(), offset, consumerConfig.bufferSize())
                 .maxWait(timeoutInMs)
+                .minBytes(consumerConfig.bufferSize())
                 .build();
         FetchResponse response = partitionConsumer.fetch(request);
         if (response.hasError()) {
