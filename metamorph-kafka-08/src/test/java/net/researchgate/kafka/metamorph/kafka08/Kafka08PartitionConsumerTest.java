@@ -157,18 +157,56 @@ public class Kafka08PartitionConsumerTest {
 
         List<PartitionConsumerRecord<String,String>> records;
 
-        consumer.seek(50L);
+        consumer.seek(50);
         records = consumer.poll(0);
         Assert.assertEquals(50, records.size());
-        Assert.assertEquals(50L, records.get(0).offset());
+        Assert.assertEquals(50, records.get(0).offset());
 
         consumer.seek(consumer.earliestPosition());
         records = consumer.poll(0);
         Assert.assertEquals(100, records.size());
-        Assert.assertEquals(0L, records.get(0).offset());
+        Assert.assertEquals(0, records.get(0).offset());
 
         consumer.seek(consumer.latestPosition());
         records = consumer.poll(0);
         Assert.assertEquals(0, records.size());
+    }
+
+    @Test
+    public void testPollBatched() throws Exception {
+        final String topic = "test_topic";
+        context.createTopic(topic, 1);
+
+        KafkaProducer<String, String> producer = context.createProducer();
+
+        List<Future<RecordMetadata>> futures = new ArrayList<>();
+        for (int i = 0; i < 7000; i++) {
+            Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, "test-key-" + i, "test-value"));
+            futures.add(future);
+        }
+
+        for (Future f : futures) {
+            f.get();
+        }
+
+        producer.close();
+
+        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
+        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+
+        consumer.assign(new TopicPartition(topic, 0));
+        List<PartitionConsumerRecord<String,String>> records = consumer.poll(0);
+        Assert.assertEquals(0L, records.get(0).offset());
+        Assert.assertEquals(1359, records.get(records.size() - 1).offset());
+        long offset = 1359;
+        while (offset < 6707) {
+            records = consumer.poll(0);
+            Assert.assertEquals(offset + 1, records.get(0).offset());
+            Assert.assertEquals(offset + 1337, records.get(records.size() - 1).offset());
+            offset += 1337;
+        }
+        records = consumer.poll(0);
+        Assert.assertEquals(6708, records.get(0).offset());
+        Assert.assertEquals(6999, records.get(records.size() - 1).offset());
     }
 }
