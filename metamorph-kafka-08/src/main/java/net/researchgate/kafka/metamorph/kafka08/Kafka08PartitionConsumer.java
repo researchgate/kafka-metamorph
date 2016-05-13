@@ -1,10 +1,16 @@
 package net.researchgate.kafka.metamorph.kafka08;
 
+import kafka.api.FetchRequest;
+import kafka.api.FetchRequestBuilder;
 import kafka.api.PartitionOffsetRequestInfo;
 import kafka.cluster.Broker;
+import kafka.common.ErrorMapping;
 import kafka.common.TopicAndPartition;
 import kafka.javaapi.*;
 import kafka.javaapi.consumer.SimpleConsumer;
+import kafka.javaapi.message.ByteBufferMessageSet;
+import kafka.message.MessageAndOffset;
+import kafka.serializer.Decoder;
 import net.researchgate.kafka.metamorph.KafkaNode;
 import net.researchgate.kafka.metamorph.PartitionConsumer;
 import net.researchgate.kafka.metamorph.PartitionConsumerRecord;
@@ -13,19 +19,23 @@ import net.researchgate.kafka.metamorph.exceptions.PartitionConsumerException;
 import net.researchgate.kafka.metamorph.kafka08.exceptions.NoBrokerAvailableException;
 import net.researchgate.kafka.metamorph.kafka08.exceptions.OffsetFetchException;
 import net.researchgate.kafka.metamorph.kafka08.exceptions.PartitionNotAvailableException;
+import net.researchgate.kafka.metamorph.kafka08.internals.PartitionConsumerRecordTransformer;
 
 import java.util.*;
 
 public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
 
     private final Kafka08PartitionConsumerConfig consumerConfig;
+    private final PartitionConsumerRecordTransformer<K,V> recordTransformer;
 
     private SimpleConsumer partitionConsumer;
     private TopicPartition assignedTopicPartition;
+    private long fetchOffset;
     private boolean isClosed = false;
 
-    public Kafka08PartitionConsumer(Kafka08PartitionConsumerConfig consumerConfig) {
+    public Kafka08PartitionConsumer(Kafka08PartitionConsumerConfig consumerConfig, Decoder<K> keyDecoder, Decoder<V> valueDecoder) {
         this.consumerConfig = consumerConfig;
+        this.recordTransformer = new PartitionConsumerRecordTransformer<>(keyDecoder, valueDecoder);
     }
 
     @Override
@@ -49,32 +59,44 @@ public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     @Override
-    public List<PartitionConsumerRecord<K, V>> poll(long timeout) throws PartitionConsumerException {
+    public List<PartitionConsumerRecord<K, V>> poll(int timeout) throws PartitionConsumerException {
         ensureAssignedAndNotClosed();
-        return null;
+        ByteBufferMessageSet messageSet = getMessageSetSince(fetchOffset, timeout);
+        List<PartitionConsumerRecord<K,V>> records = new ArrayList<>();
+        for (MessageAndOffset messageAndOffset : messageSet) {
+            // @todo handle serialization errors properly
+            PartitionConsumerRecord<K,V> record = recordTransformer.transform(assignedTopicPartition, messageAndOffset);
+            records.add(record);
+            fetchOffset = Math.max(messageAndOffset.nextOffset(), fetchOffset);
+        }
+        return records;
     }
 
     @Override
     public long position() throws PartitionConsumerException {
         ensureAssignedAndNotClosed();
-        return 0;
+        return fetchOffset;
     }
 
     @Override
     public long earliestPosition() throws PartitionConsumerException {
         ensureAssignedAndNotClosed();
-        return getOffsetForPartition(partitionConsumer, kafka.api.OffsetRequest.EarliestTime());
+        return getOffsetForPartition(kafka.api.OffsetRequest.EarliestTime());
     }
 
     @Override
     public long latestPosition() throws PartitionConsumerException {
         ensureAssignedAndNotClosed();
-        return getOffsetForPartition(partitionConsumer, kafka.api.OffsetRequest.LatestTime());
+        return getOffsetForPartition(kafka.api.OffsetRequest.LatestTime());
     }
 
     @Override
     public void seek(long offset) throws PartitionConsumerException {
         ensureAssignedAndNotClosed();
+        if (offset < 0) {
+            throw new IndexOutOfBoundsException(String.format("Negative offsets are disallowed, offset given: %d", offset));
+        }
+        fetchOffset = offset;
     }
 
     @Override
@@ -99,16 +121,36 @@ public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
         partitionConsumer = createConsumer(getPartitionLeader(consumerConfig.bootstrapNodes(), assignedTopicPartition.topic(), assignedTopicPartition.partition()));
     }
 
-    private long getOffsetForPartition(SimpleConsumer consumer, long whichTime) throws OffsetFetchException {
+    private ByteBufferMessageSet getMessageSetSince(long offset, int timeoutInMs) throws PartitionConsumerException {
+        if (timeoutInMs < 0) {
+            throw new IllegalArgumentException(String.format("Timeout must not lower than 0, timeout is: %d", timeoutInMs));
+        }
+        FetchRequest request = new FetchRequestBuilder()
+                .clientId(generateClientId())
+                .addFetch(assignedTopicPartition.topic(), assignedTopicPartition.partition(), offset, consumerConfig.bufferSize())
+                .maxWait(timeoutInMs)
+                .build();
+        FetchResponse response = partitionConsumer.fetch(request);
+        if (response.hasError()) {
+            short errorCode = response.errorCode(assignedTopicPartition.topic(), assignedTopicPartition.partition());
+            // @todo retry during broker failover
+            throw new PartitionConsumerException(ErrorMapping.exceptionFor(errorCode));
+        }
+        return response.messageSet(assignedTopicPartition.topic(), assignedTopicPartition.partition());
+    }
+
+    private long getOffsetForPartition(long whichTime) throws OffsetFetchException {
         Map<TopicAndPartition, PartitionOffsetRequestInfo> requestInfo = new HashMap<>();
         requestInfo.put(new TopicAndPartition(assignedTopicPartition.topic(), assignedTopicPartition.partition()), new PartitionOffsetRequestInfo(whichTime, 1));
         kafka.javaapi.OffsetRequest request = new kafka.javaapi.OffsetRequest(
-                requestInfo, kafka.api.OffsetRequest.CurrentVersion(), consumer.clientId());
-        OffsetResponse response = consumer.getOffsetsBefore(request);
+                requestInfo, kafka.api.OffsetRequest.CurrentVersion(), partitionConsumer.clientId());
+        OffsetResponse response = partitionConsumer.getOffsetsBefore(request);
 
         if (response.hasError()) {
-            throw new OffsetFetchException("Error fetching data Offset Data the Broker. Reason: " + response.errorCode(assignedTopicPartition.topic(), assignedTopicPartition.partition()));
+            short errorCode = response.errorCode(assignedTopicPartition.topic(), assignedTopicPartition.partition());
+            throw new OffsetFetchException("Error fetching data Offset Data the Broker. Error code: " + errorCode, ErrorMapping.exceptionFor(errorCode));
         }
+
         long[] offsets = response.offsets(assignedTopicPartition.topic(), assignedTopicPartition.partition());
         return offsets[0];
     }
@@ -158,9 +200,12 @@ public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
         throw new NoBrokerAvailableException(message, lastException);
     }
 
-    private SimpleConsumer createConsumer(KafkaNode node) {
+    private String generateClientId() {
         // @todo proper clientId generation
-        String clientIdPrefix = "Client";
-        return new SimpleConsumer(node.host(), node.port(), consumerConfig.socketTimeoutMs(), consumerConfig.bufferSize(), clientIdPrefix);
+        return "Client";
+    }
+
+    private SimpleConsumer createConsumer(KafkaNode node) {
+        return new SimpleConsumer(node.host(), node.port(), consumerConfig.socketTimeoutMs(), consumerConfig.bufferSize(), generateClientId());
     }
 }

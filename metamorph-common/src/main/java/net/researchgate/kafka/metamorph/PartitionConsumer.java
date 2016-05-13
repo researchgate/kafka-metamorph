@@ -56,7 +56,7 @@ public interface PartitionConsumer<K, V> extends Closeable {
      *
      * @throws PartitionConsumerException when an unrecoverable error occurs (e.g. no broker available)
      */
-    List<PartitionConsumerRecord<K, V>> poll(long timeout) throws PartitionConsumerException;
+    List<PartitionConsumerRecord<K, V>> poll(int timeout) throws PartitionConsumerException;
 
     /**
      * Get the offset of the next record that will be fetched for the assigned partition (if a record with that offset exists).
@@ -92,7 +92,7 @@ public interface PartitionConsumer<K, V> extends Closeable {
     long latestPosition() throws PartitionConsumerException;
 
     /**
-     * Explicitly sets the fetch offset which will be used on the next {@link #poll(long) poll(timeout)}
+     * Explicitly sets the fetch offset which will be used on the next {@link #poll(int) poll(timeout)}
      *
      * It is an error if the consumer is not assigned to a partition before invoking this method.
      *

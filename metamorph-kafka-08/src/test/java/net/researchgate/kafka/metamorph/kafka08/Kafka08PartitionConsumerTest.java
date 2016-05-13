@@ -1,7 +1,10 @@
 package net.researchgate.kafka.metamorph.kafka08;
 
 import junit.framework.Assert;
+import kafka.serializer.StringDecoder;
+import kafka.utils.VerifiableProperties;
 import net.researchgate.kafka.metamorph.PartitionConsumer;
+import net.researchgate.kafka.metamorph.PartitionConsumerRecord;
 import net.researchgate.kafka.metamorph.TopicPartition;
 import net.researchgate.kafka.metamorph.exceptions.PartitionConsumerException;
 import net.researchgate.kafka.metamorph.kafka08.utils.KafkaTestContext;
@@ -40,7 +43,7 @@ public class Kafka08PartitionConsumerTest {
         context.createTopic(topic, 1);
 
         Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig);
+        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
 
         Collection<TopicPartition> partitions = consumer.partitionsFor(topic);
         Assert.assertEquals(1, partitions.size());
@@ -53,7 +56,7 @@ public class Kafka08PartitionConsumerTest {
         context.createTopic(topic, 10);
 
         Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig);
+        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
 
         Collection<TopicPartition> partitions = consumer.partitionsFor(topic);
         Assert.assertEquals(10, partitions.size());
@@ -67,7 +70,7 @@ public class Kafka08PartitionConsumerTest {
         context.createTopic(topic, 1);
 
         Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig);
+        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
 
         consumer.assign(new TopicPartition(topic, 0));
 
@@ -95,11 +98,41 @@ public class Kafka08PartitionConsumerTest {
         producer.close();
 
         Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig);
+        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
 
         consumer.assign(new TopicPartition(topic, 0));
 
         Assert.assertEquals(0L, consumer.earliestPosition());
         Assert.assertEquals(5L, consumer.latestPosition());
+    }
+
+    @Test
+    public void testPoll() throws Exception {
+        final String topic = "test_topic";
+        context.createTopic(topic, 1);
+
+        KafkaProducer<String, String> producer = context.createProducer();
+
+        for (int i = 0; i < 5; i++) {
+            Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, "test-key-" + i, "test-value-" + i));
+            future.get();
+        }
+
+        producer.close();
+
+        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
+        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+
+        consumer.assign(new TopicPartition(topic, 0));
+
+        List<PartitionConsumerRecord<String,String>> records = consumer.poll(0);
+        Assert.assertEquals(5, records.size());
+        for (int i = 0; i < 5; i++) {
+            Assert.assertEquals(i, records.get(i).offset());
+            Assert.assertEquals("test-key-" + i, records.get(i).key());
+            Assert.assertEquals("test-value-" + i, records.get(i).value());
+            Assert.assertEquals(topic, records.get(i).topic());
+            Assert.assertEquals(0, records.get(i).partition());
+        }
     }
 }
