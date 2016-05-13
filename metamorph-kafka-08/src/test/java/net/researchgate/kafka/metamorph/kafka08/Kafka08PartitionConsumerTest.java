@@ -135,4 +135,40 @@ public class Kafka08PartitionConsumerTest {
             Assert.assertEquals(0, records.get(i).partition());
         }
     }
+
+    @Test
+    public void testSeekAndPoll() throws Exception {
+        final String topic = "test_topic";
+        context.createTopic(topic, 1);
+
+        KafkaProducer<String, String> producer = context.createProducer();
+
+        for (int i = 0; i < 100; i++) {
+            Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, "test-key-" + i, "test-value-" + i));
+            future.get();
+        }
+
+        producer.close();
+
+        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
+        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+
+        consumer.assign(new TopicPartition(topic, 0));
+
+        List<PartitionConsumerRecord<String,String>> records;
+
+        consumer.seek(50L);
+        records = consumer.poll(0);
+        Assert.assertEquals(50, records.size());
+        Assert.assertEquals(50L, records.get(0).offset());
+
+        consumer.seek(consumer.earliestPosition());
+        records = consumer.poll(0);
+        Assert.assertEquals(100, records.size());
+        Assert.assertEquals(0L, records.get(0).offset());
+
+        consumer.seek(consumer.latestPosition());
+        records = consumer.poll(0);
+        Assert.assertEquals(0, records.size());
+    }
 }
