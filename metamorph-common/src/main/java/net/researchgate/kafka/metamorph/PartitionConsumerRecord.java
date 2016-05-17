@@ -31,35 +31,35 @@ public class PartitionConsumerRecord<K,V> {
     }
 
     /**
-     * The topic this record is received from
+     * @return the topic this record is received from
      */
     public String topic() {
         return topic;
     }
 
     /**
-     * The partition from which this record is received
+     * @return the partition from which this record is received
      */
     public int partition() {
         return partition;
     }
 
     /**
-     * The key (or null if no key is specified)
+     * @return the key (or null if no key is specified) of the record
      */
     public K key() {
         return key;
     }
 
     /**
-     * The value
+     * @return the value of the record
      */
     public V value() {
         return value;
     }
 
     /**
-     * The position of this record in the corresponding partition.
+     * @return the position of this record in the corresponding partition.
      */
     public long offset() {
         return offset;

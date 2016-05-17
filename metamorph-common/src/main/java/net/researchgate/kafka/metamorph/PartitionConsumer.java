@@ -96,6 +96,8 @@ public interface PartitionConsumer<K, V> extends Closeable {
      *
      * It is an error if the consumer is not assigned to a partition before invoking this method.
      *
+     * @param offset the offset which will be used on the next {@link #poll(int) poll(timeout)}
+     *
      * @throws PartitionConsumerException when an unrecoverable error occurs (e.g. no broker available)
      */
     void seek(long offset) throws PartitionConsumerException;

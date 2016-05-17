@@ -14,14 +14,14 @@ public class TopicPartition {
     }
 
     /**
-     * The partition id
+     * @return the partition id
      */
     public int partition() {
         return partition;
     }
 
     /**
-     * The topic name
+     * @return the topic name
      */
     public String topic() {
         return topic;

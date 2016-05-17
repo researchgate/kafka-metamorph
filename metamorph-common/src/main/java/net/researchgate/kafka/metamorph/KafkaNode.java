@@ -17,14 +17,14 @@ public class KafkaNode {
     }
 
     /**
-     * The hostname of this node
+     * @return the hostname of this node
      */
     public String host() {
         return host;
     }
 
     /**
-     * The port of this node
+     * @return the port of this node
      */
     public int port() {
         return port;
