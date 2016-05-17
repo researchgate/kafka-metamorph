@@ -46,3 +46,19 @@ need to refactor your codebase later or you need to wait until your brokers can 
 
 This is the part in which kafka-metamorph comes into play. By providing one unified interface which can be
 used with older Kafka versions you can implement your use-case today and worry about broker updates later. Yay!
+
+## Usage
+
+The project is separated into a generic interface (provided via metamorph-commons) and implementations targeted at a specific Kafka version (e.g. metamorph-kafka-08 for usage with Kafka 0.8.x).
+
+This example shows how to fetch data from partition 0 of the topic "some_topic".
+
+```
+    PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(new Kafka08PartitionConsumerConfig.Builder("localhost:9092").build(), new StringDecoder(null), new StringDecoder(null));
+
+    consumer.assign(new TopicPartition("some_topic", 0));
+
+    for (PartitionConsumerRecord<String,String> record : consumer.poll(0)) {
+        System.out.println(record.offset() + "," + record.key() + "," + record.value());
+    }
+```
