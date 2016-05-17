@@ -67,4 +67,4 @@ This example shows how to fetch data from partition 0 of the topic "some_topic".
     }
 ```
 
-The initialization does contain version specific code (in this example for Kafa 0.8.x) but everything after the initialization is version agnostic and just relies on the interface.
+The initialization does contain version specific code (in this example for Kafka 0.8.x) but everything after the initialization is version agnostic and will work with newer and older Kafka versions.
