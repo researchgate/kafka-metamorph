@@ -1,5 +1,5 @@
 # kafka-metamorph
-Backwards compatible Kafka consumer for selective partition consumption and explicit offset control
+Backwards compatible Apache Kafka consumer API for selective partition consumption and explicit offset control
 
 [![Build Status](https://travis-ci.org/researchgate/kafka-metamorph.svg?branch=master)](https://travis-ci.org/researchgate/kafka-metamorph)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
