@@ -49,6 +49,10 @@ subprojects {
         }
     }
 
+    configurations {
+        testArtifacts.extendsFrom testRuntime
+    }
+
     task sourcesJar(type: Jar, dependsOn: classes) {
         classifier = 'sources'
         from sourceSets.main.allSource
@@ -59,8 +63,14 @@ subprojects {
         from javadoc.destinationDir
     }
 
+    task testJar(type: Jar) {
+        classifier "test"
+        from sourceSets.test.output
+    }
+
     artifacts {
         archives sourcesJar, javadocJar
+        testArtifacts testJar
     }
 }
 
@@ -79,6 +89,7 @@ project(':metamorph-kafka-09') {
         compile project(':metamorph-common')
         compile 'org.apache.kafka:kafka_2.10:0.9.0.1'
 
+        testCompile project(path: ':metamorph-common', configuration: 'testArtifacts')
         testCompile 'org.apache.kafka:kafka_2.10:0.9.0.1:test'
         testCompile 'org.apache.kafka:kafka-clients:0.9.0.1'
     }

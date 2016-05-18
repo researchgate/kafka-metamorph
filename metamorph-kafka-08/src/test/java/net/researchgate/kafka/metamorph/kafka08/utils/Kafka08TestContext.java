@@ -17,7 +17,7 @@ import java.util.Properties;
 
 import static scala.collection.JavaConversions.asScalaBuffer;
 
-public class KafkaTestContext implements Closeable {
+public class Kafka08TestContext implements Closeable {
 
     private static int sequence = 0;
     private final int brokerId;
@@ -28,7 +28,7 @@ public class KafkaTestContext implements Closeable {
     private KafkaServer kafkaServer;
     private boolean initialized;
 
-    public KafkaTestContext() {
+    public Kafka08TestContext() {
         brokerId = sequence++;
     }
 
@@ -87,7 +87,7 @@ public class KafkaTestContext implements Closeable {
 
     private void ensureInitialized() {
         if (!initialized) {
-            throw new IllegalStateException("Context must be initialized, ensure that KafkaTestContext:initialize() has been invoked");
+            throw new IllegalStateException("Context must be initialized, ensure that Kafka08TestContext:initialize() has been invoked");
         }
     }
 

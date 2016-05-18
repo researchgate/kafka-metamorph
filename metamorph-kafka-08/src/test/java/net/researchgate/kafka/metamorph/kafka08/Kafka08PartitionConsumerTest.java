@@ -7,7 +7,7 @@ import net.researchgate.kafka.metamorph.PartitionConsumer;
 import net.researchgate.kafka.metamorph.PartitionConsumerRecord;
 import net.researchgate.kafka.metamorph.TopicPartition;
 import net.researchgate.kafka.metamorph.exceptions.PartitionConsumerException;
-import net.researchgate.kafka.metamorph.kafka08.utils.KafkaTestContext;
+import net.researchgate.kafka.metamorph.kafka08.utils.Kafka08TestContext;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -24,11 +24,11 @@ import java.util.concurrent.Future;
 
 public class Kafka08PartitionConsumerTest {
 
-    private KafkaTestContext context;
+    private Kafka08TestContext context;
 
     @Before
     public void setUp() {
-        context = new KafkaTestContext();
+        context = new Kafka08TestContext();
         context.initialize();
     }
 

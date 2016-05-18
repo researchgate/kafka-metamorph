@@ -3,17 +3,17 @@ package net.researchgate.kafka.metamorph.kafka09.utils;
 import kafka.admin.TopicCommand;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServer;
-import kafka.utils.*;
+import kafka.utils.MockTime;
+import kafka.utils.TestUtils;
+import kafka.utils.Time;
+import kafka.utils.ZkUtils;
 import kafka.zk.EmbeddedZookeeper;
-import org.I0Itec.zkclient.ZkClient;
-import org.I0Itec.zkclient.ZkConnection;
+import net.researchgate.kafka.metamorph.KafkaTestContext;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.common.protocol.SecurityProtocol;
 import org.apache.kafka.common.serialization.StringSerializer;
 import scala.Option;
-import scala.Tuple2;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -23,7 +23,7 @@ import java.util.Properties;
 
 import static scala.collection.JavaConversions.asScalaBuffer;
 
-public class KafkaTestContext implements Closeable {
+public class Kafka09TestContext implements KafkaTestContext {
 
     private static int sequence = 0;
     private final int brokerId;
@@ -33,7 +33,7 @@ public class KafkaTestContext implements Closeable {
     private boolean initialized;
     private ZkUtils zkUtils;
 
-    public KafkaTestContext() {
+    public Kafka09TestContext() {
         brokerId = sequence++;
     }
 
