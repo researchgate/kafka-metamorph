@@ -42,8 +42,7 @@ public class Kafka08PartitionConsumerTest {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
 
-        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+        PartitionConsumer<String, String> consumer = initializeUnitUnderTest();
 
         Collection<TopicPartition> partitions = consumer.partitionsFor(topic);
         Assert.assertEquals(1, partitions.size());
@@ -55,8 +54,7 @@ public class Kafka08PartitionConsumerTest {
         final String topic = "test_topic";
         context.createTopic(topic, 10);
 
-        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+        PartitionConsumer<String, String> consumer = initializeUnitUnderTest();
 
         Collection<TopicPartition> partitions = consumer.partitionsFor(topic);
         Assert.assertEquals(10, partitions.size());
@@ -69,8 +67,7 @@ public class Kafka08PartitionConsumerTest {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
 
-        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+        PartitionConsumer<String, String> consumer = initializeUnitUnderTest();
 
         consumer.assign(new TopicPartition(topic, 0));
 
@@ -97,8 +94,7 @@ public class Kafka08PartitionConsumerTest {
 
         producer.close();
 
-        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+        PartitionConsumer<String, String> consumer = initializeUnitUnderTest();
 
         consumer.assign(new TopicPartition(topic, 0));
 
@@ -120,8 +116,7 @@ public class Kafka08PartitionConsumerTest {
 
         producer.close();
 
-        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+        PartitionConsumer<String, String> consumer = initializeUnitUnderTest();
 
         consumer.assign(new TopicPartition(topic, 0));
 
@@ -150,8 +145,7 @@ public class Kafka08PartitionConsumerTest {
 
         producer.close();
 
-        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+        PartitionConsumer<String, String> consumer = initializeUnitUnderTest();
 
         consumer.assign(new TopicPartition(topic, 0));
 
@@ -191,8 +185,7 @@ public class Kafka08PartitionConsumerTest {
 
         producer.close();
 
-        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+        PartitionConsumer<String, String> consumer = initializeUnitUnderTest();
 
         consumer.assign(new TopicPartition(topic, 0));
         List<PartitionConsumerRecord<String,String>> records = consumer.poll(0);
@@ -240,8 +233,7 @@ public class Kafka08PartitionConsumerTest {
             }
         };
 
-        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        PartitionConsumer<String, String> consumer = new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+        PartitionConsumer<String, String> consumer = initializeUnitUnderTest();
 
         consumer.assign(new TopicPartition(topic, 0));
 
@@ -253,5 +245,10 @@ public class Kafka08PartitionConsumerTest {
         producerThread.join();
 
         Assert.assertEquals(500, records.size());
+    }
+
+    private PartitionConsumer<String, String> initializeUnitUnderTest() {
+        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
+        return new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
     }
 }

@@ -13,6 +13,7 @@ import java.util.*;
 
 public class Kafka09PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
 
+    private TopicPartition assignedPartition;
     private final KafkaConsumer<K,V> consumer;
 
     public Kafka09PartitionConsumer(Properties properties, Deserializer<K> keyDeserializer, Deserializer<V> valueDeserializer) {
@@ -41,6 +42,7 @@ public class Kafka09PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
         } catch (KafkaException e) {
             throw new PartitionConsumerException(e);
         }
+        assignedPartition = partition;
     }
 
     @Override

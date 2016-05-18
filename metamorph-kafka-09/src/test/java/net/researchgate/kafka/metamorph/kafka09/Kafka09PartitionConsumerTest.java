@@ -35,12 +35,16 @@ public class Kafka09PartitionConsumerTest {
         final String topic = "test-topic";
         context.createTopic(topic, 1);
 
-        Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, context.getBootstrapServerString());
-        PartitionConsumer<String, String> consumer = new Kafka09PartitionConsumer<>(props, new StringDeserializer(), new StringDeserializer());
+        PartitionConsumer<String, String> consumer = initializeUnitUnderTest();
 
         Collection<TopicPartition> partitions = consumer.partitionsFor(topic);
         Assert.assertEquals(1, partitions.size());
         Assert.assertEquals(0, ((TopicPartition) partitions.toArray()[0]).partition());
+    }
+
+    private PartitionConsumer<String,String> initializeUnitUnderTest() {
+        Properties props = new Properties();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, context.getBootstrapServerString());
+        return new Kafka09PartitionConsumer<>(props, new StringDeserializer(), new StringDeserializer());
     }
 }
