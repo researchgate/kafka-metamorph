@@ -4,12 +4,8 @@ Backwards compatible Apache Kafka consumer API for selective partition consumpti
 [![Build Status](https://travis-ci.org/researchgate/kafka-metamorph.svg?branch=master)](https://travis-ci.org/researchgate/kafka-metamorph)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-- [Background](#)
-    - [TL;DR](#)
-    - [The old fashioned way](#)
-    - [Brave new world - Kafka 0.9.0](#)
-    - [Introducing metamorph](#)
-- [Usage](#)
+- [Background](#background)
+- [Usage](#usage)
 
 ## Background
 
