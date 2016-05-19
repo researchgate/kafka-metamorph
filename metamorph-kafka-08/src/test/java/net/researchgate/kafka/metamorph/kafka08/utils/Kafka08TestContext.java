@@ -3,21 +3,22 @@ package net.researchgate.kafka.metamorph.kafka08.utils;
 import kafka.admin.TopicCommand;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServer;
-import kafka.utils.*;
+import kafka.utils.MockTime;
+import kafka.utils.TestUtils;
+import kafka.utils.TestZKUtils;
+import kafka.utils.Time;
+import kafka.utils.ZKStringSerializer$;
 import kafka.zk.EmbeddedZookeeper;
+import net.researchgate.kafka.metamorph.KafkaTestContext;
 import org.I0Itec.zkclient.ZkClient;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.common.serialization.StringSerializer;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import static scala.collection.JavaConversions.asScalaBuffer;
 
-public class Kafka08TestContext implements Closeable {
+public class Kafka08TestContext implements KafkaTestContext {
 
     private static int sequence = 0;
     private final int brokerId;
@@ -71,18 +72,6 @@ public class Kafka08TestContext implements Closeable {
     public String getBootstrapServerString() {
         ensureInitialized();
         return "localhost:" + port;
-    }
-
-    public KafkaProducer<String, String> createProducer() {
-        return createProducer(StringSerializer.class, StringSerializer.class);
-    }
-
-    public <K,V> KafkaProducer<K,V> createProducer(Class keySerializerClass , Class valueSerializerClass) {
-        Properties props = new Properties();
-        props.put(org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, getBootstrapServerString());
-        props.put(org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializerClass);
-        props.put(org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializerClass);
-        return new KafkaProducer<>(props);
     }
 
     private void ensureInitialized() {

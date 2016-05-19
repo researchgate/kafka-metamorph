@@ -1,8 +1,9 @@
 package net.researchgate.kafka.metamorph.kafka08;
 
-import junit.framework.Assert;
 import kafka.serializer.StringDecoder;
 import kafka.utils.VerifiableProperties;
+import net.researchgate.kafka.metamorph.AbstractKafkaPartitionConsumerTest;
+import net.researchgate.kafka.metamorph.KafkaTestContext;
 import net.researchgate.kafka.metamorph.PartitionConsumer;
 import net.researchgate.kafka.metamorph.PartitionConsumerRecord;
 import net.researchgate.kafka.metamorph.TopicPartition;
@@ -11,30 +12,40 @@ import net.researchgate.kafka.metamorph.kafka08.utils.Kafka08TestContext;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.junit.After;
-import org.junit.Before;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.Test;
+import org.junit.Assert;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-public class Kafka08PartitionConsumerTest {
+public class Kafka08PartitionConsumerTest extends AbstractKafkaPartitionConsumerTest {
 
-    private Kafka08TestContext context;
-
-    @Before
-    public void setUp() {
-        context = new Kafka08TestContext();
-        context.initialize();
+    @Override
+    protected KafkaTestContext getContext() {
+        return new Kafka08TestContext();
     }
 
-    @After
-    public void tearDown() throws IOException {
-        context.close();
+    @Override
+    protected PartitionConsumer<String, String> initializeUnitUnderTest() {
+        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
+        return new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
+    }
+
+    private KafkaProducer<String, String> createProducer() {
+        return createProducer(StringSerializer.class, StringSerializer.class);
+    }
+
+    private <K,V> KafkaProducer<K,V> createProducer(Class keySerializerClass , Class valueSerializerClass) {
+        Properties props = new Properties();
+        props.put(org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, context.getBootstrapServerString());
+        props.put(org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializerClass);
+        props.put(org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializerClass);
+        return new KafkaProducer<>(props);
     }
 
     @Test
@@ -80,7 +91,7 @@ public class Kafka08PartitionConsumerTest {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
 
-        KafkaProducer<String, String> producer = context.createProducer();
+        KafkaProducer<String, String> producer = createProducer();
 
         List<Future<RecordMetadata>> futures = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -107,7 +118,7 @@ public class Kafka08PartitionConsumerTest {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
 
-        KafkaProducer<String, String> producer = context.createProducer();
+        KafkaProducer<String, String> producer = createProducer();
 
         for (int i = 0; i < 5; i++) {
             Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, "test-key-" + i, "test-value-" + i));
@@ -136,7 +147,7 @@ public class Kafka08PartitionConsumerTest {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
 
-        KafkaProducer<String, String> producer = context.createProducer();
+        KafkaProducer<String, String> producer = createProducer();
 
         for (int i = 0; i < 100; i++) {
             Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, "test-key-" + i, "test-value-" + i));
@@ -171,7 +182,7 @@ public class Kafka08PartitionConsumerTest {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
 
-        KafkaProducer<String, String> producer = context.createProducer();
+        KafkaProducer<String, String> producer = createProducer();
 
         List<Future<RecordMetadata>> futures = new ArrayList<>();
         for (int i = 0; i < 7000; i++) {
@@ -208,11 +219,9 @@ public class Kafka08PartitionConsumerTest {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
 
-        final KafkaProducer<String, String> producer = context.createProducer();
-
         Thread producerThread = new Thread() {
             public void run() {
-                try {
+                try (KafkaProducer<String, String> producer = createProducer()) {
                     Thread.sleep(10);
 
                     List<Future<RecordMetadata>> futures = new ArrayList<>();
@@ -224,10 +233,8 @@ public class Kafka08PartitionConsumerTest {
                     for (Future f : futures) {
                         f.get();
                     }
-                } catch(Exception e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
-                } finally {
-                    producer.close();
                 }
 
             }
@@ -247,8 +254,4 @@ public class Kafka08PartitionConsumerTest {
         Assert.assertEquals(500, records.size());
     }
 
-    private PartitionConsumer<String, String> initializeUnitUnderTest() {
-        Kafka08PartitionConsumerConfig consumerConfig = new Kafka08PartitionConsumerConfig.Builder(context.getBootstrapServerString()).build();
-        return new Kafka08PartitionConsumer<>(consumerConfig, new StringDecoder(new VerifiableProperties()), new StringDecoder(new VerifiableProperties()));
-    }
 }
