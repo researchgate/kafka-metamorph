@@ -1,9 +1,12 @@
 package net.researchgate.kafka.metamorph;
 
 import net.researchgate.kafka.metamorph.exceptions.PartitionConsumerException;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Collection;
 
 public abstract class AbstractKafkaPartitionConsumerTest {
@@ -12,6 +15,18 @@ public abstract class AbstractKafkaPartitionConsumerTest {
 
     protected abstract PartitionConsumer<String, String> initializeUnitUnderTest();
 
+    protected abstract KafkaTestContext getContext();
+
+    @Before
+    public void setUp() {
+        context = getContext();
+        context.initialize();
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        context.close();
+    }
 
     @Test
     public void testPartitionDiscoveryOnePartition() throws PartitionConsumerException {
