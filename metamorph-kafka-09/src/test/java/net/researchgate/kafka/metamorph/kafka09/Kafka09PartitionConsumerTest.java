@@ -8,12 +8,23 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 public class Kafka09PartitionConsumerTest extends AbstractKafkaPartitionConsumerTest {
 
     @Override
     protected KafkaTestContext getContext() {
         return new Kafka09TestContext();
+    }
+
+    @Override
+    protected void produceMessagesOrdered(String topic, int messageNum) throws ExecutionException, InterruptedException {
+
+    }
+
+    @Override
+    protected void produceMessagesUnordered(String topic, int messageNum) throws ExecutionException, InterruptedException {
+
     }
 
     @Override
