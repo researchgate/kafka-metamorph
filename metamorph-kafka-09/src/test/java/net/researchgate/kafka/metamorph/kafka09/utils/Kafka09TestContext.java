@@ -98,13 +98,19 @@ public class Kafka09TestContext implements KafkaTestContext {
     }
 
     private int getRandomPort() {
-        ServerSocket s = null;
+        ServerSocket s;
         try {
             s = new ServerSocket(0);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return s.getLocalPort();
+        int port = s.getLocalPort();
+        try {
+            s.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Random port close error");
+        }
+        return port;
     }
 
     @Override
