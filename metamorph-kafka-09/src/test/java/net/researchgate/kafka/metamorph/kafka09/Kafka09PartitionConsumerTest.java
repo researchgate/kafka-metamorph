@@ -3,6 +3,7 @@ package net.researchgate.kafka.metamorph.kafka09;
 import net.researchgate.kafka.metamorph.AbstractKafkaPartitionConsumerTest;
 import net.researchgate.kafka.metamorph.KafkaTestContext;
 import net.researchgate.kafka.metamorph.PartitionConsumer;
+import net.researchgate.kafka.metamorph.exceptions.PartitionConsumerException;
 import net.researchgate.kafka.metamorph.kafka09.utils.Kafka09TestContext;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -10,6 +11,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,4 +74,38 @@ public class Kafka09PartitionConsumerTest extends AbstractKafkaPartitionConsumer
         return new Kafka09PartitionConsumer<>(props, new StringDeserializer(), new StringDeserializer());
     }
 
+    @Ignore(value = "Not implemented")
+    @Override
+    @Test
+    public void testPollBatched() throws Exception {
+        super.testPollBatched();
+    }
+
+    @Ignore(value = "Not implemented")
+    @Override
+    @Test
+    public void testPoll() throws Exception {
+        super.testPoll();
+    }
+
+    @Ignore(value = "Not implemented")
+    @Override
+    @Test
+    public void testSeekAndPoll() throws Exception {
+        super.testSeekAndPoll();
+    }
+
+    @Ignore(value = "Not implemented")
+    @Override
+    @Test
+    public void testFetchBoundaryOffsets() throws PartitionConsumerException, ExecutionException, InterruptedException {
+        super.testFetchBoundaryOffsets();
+    }
+
+    @Ignore(value = "Not implemented")
+    @Override
+    @Test
+    public void testPollTailing() throws Exception {
+        super.testPollTailing();
+    }
 }
