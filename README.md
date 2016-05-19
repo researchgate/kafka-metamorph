@@ -4,6 +4,13 @@ Backwards compatible Apache Kafka consumer API for selective partition consumpti
 [![Build Status](https://travis-ci.org/researchgate/kafka-metamorph.svg?branch=master)](https://travis-ci.org/researchgate/kafka-metamorph)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
+- [Background](#)
+    - [TL;DR](#)
+    - [The old fashioned way](#)
+    - [Brave new world - Kafka 0.9.0](#)
+    - [Introducing metamorph](#)
+- [Usage](#)
+
 ## Background
 
 ### TL;DR
@@ -50,10 +57,9 @@ used with older Kafka versions you can implement your use-case today and worry a
 
 ## Usage
 
-The project is separated into a generic interface (provided via metamorph-commons) and implementations targeted at a specific Kafka version (e.g. metamorph-kafka-08 for usage with Kafka 0.8.x).
+The project is separated into a generic interface (provided via metamorph-common) and implementations targeted at a specific Kafka version (e.g. metamorph-kafka-08 for usage with Kafka 0.8.x).
 
-The PartitionConsumer interface provided by metamorph-commons (see [javadocs](http://researchgate.github.io/kafka-metamorph/latest/javadoc/metamorph-common/index.html?net/researchgate/kafka/metamorph/PartitionConsumer.html)) is an abstraction layer
-on top of different Kafka consumer implementations. It allows the discovery of all partitions of a topic and the consumption of a given topic partition.
+The [PartitionConsumer](http://researchgate.github.io/kafka-metamorph/latest/javadoc/metamorph-common/index.html?net/researchgate/kafka/metamorph/PartitionConsumer.html) interface provided by metamorph-commons is an abstraction layer on top of different Kafka consumer implementations. It allows the discovery of all partitions of a topic and the consumption of a given topic partition.
 
 This example shows how to fetch data from partition 0 of the topic "some_topic".
 
