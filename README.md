@@ -55,7 +55,7 @@ used with older Kafka versions you can implement your use-case today and worry a
 
 The project is separated into a generic interface (provided via metamorph-common) and implementations targeted at a specific Kafka version (e.g. metamorph-kafka-08 for usage with Kafka 0.8.x).
 
-The [PartitionConsumer](http://researchgate.github.io/kafka-metamorph/latest/javadoc/metamorph-common/index.html?net/researchgate/kafka/metamorph/PartitionConsumer.html) interface provided by metamorph-commons is an abstraction layer on top of different Kafka consumer implementations. It allows the discovery of all partitions of a topic and the consumption of a given topic partition.
+The [PartitionConsumer](http://researchgate.github.io/kafka-metamorph/latest/javadoc/metamorph-common/index.html?net/researchgate/kafka/metamorph/PartitionConsumer.html) interface provided by metamorph-common is an abstraction layer on top of different Kafka consumer implementations. It allows the discovery of all partitions of a topic and the consumption of a given topic partition.
 
 This example shows how to fetch data from partition 0 of the topic "some_topic".
 
