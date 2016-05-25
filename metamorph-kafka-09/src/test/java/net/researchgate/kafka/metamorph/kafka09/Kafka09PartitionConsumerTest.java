@@ -3,7 +3,6 @@ package net.researchgate.kafka.metamorph.kafka09;
 import net.researchgate.kafka.metamorph.AbstractKafkaPartitionConsumerTest;
 import net.researchgate.kafka.metamorph.KafkaTestContext;
 import net.researchgate.kafka.metamorph.PartitionConsumer;
-import net.researchgate.kafka.metamorph.exceptions.PartitionConsumerException;
 import net.researchgate.kafka.metamorph.kafka09.utils.Kafka09TestContext;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -40,31 +39,28 @@ public class Kafka09PartitionConsumerTest extends AbstractKafkaPartitionConsumer
 
     @Override
     protected void produceMessagesOrdered(String topic, int messageNum) throws ExecutionException, InterruptedException {
-        KafkaProducer<String, String> producer = createProducer();
-
-        for (int i = 0; i < messageNum; i++) {
-            Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, "test-key-" + i, "test-value-" + i));
-            future.get();
+        try (KafkaProducer<String, String> producer = createProducer()) {
+            for (int i = 0; i < messageNum; i++) {
+                Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, "test-key-" + i, "test-value-" + i));
+                future.get();
+            }
         }
-
-        producer.close();
     }
 
     @Override
     protected void produceMessagesUnordered(String topic, int messageNum) throws ExecutionException, InterruptedException {
-        KafkaProducer<String, String> producer = createProducer();
+        try (KafkaProducer<String, String> producer = createProducer()) {
+            List<Future<RecordMetadata>> futures = new ArrayList<>();
 
-        List<Future<RecordMetadata>> futures = new ArrayList<>();
-        for (int i = 0; i < messageNum; i++) {
-            Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, "test-key-" + i, "test-value"));
-            futures.add(future);
+            for (int i = 0; i < messageNum; i++) {
+                Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, "test-key-" + i, "test-value-" + i));
+                futures.add(future);
+            }
+
+            for (Future f : futures) {
+                f.get();
+            }
         }
-
-        for (Future f : futures) {
-            f.get();
-        }
-
-        producer.close();
     }
 
     @Override
@@ -74,38 +70,11 @@ public class Kafka09PartitionConsumerTest extends AbstractKafkaPartitionConsumer
         return new Kafka09PartitionConsumer<>(props, new StringDeserializer(), new StringDeserializer());
     }
 
-    @Ignore(value = "Not implemented")
+    @Ignore(value = "Not suitable for kafka 09")
     @Override
     @Test
     public void testPollBatched() throws Exception {
         super.testPollBatched();
     }
 
-    @Ignore(value = "Not implemented")
-    @Override
-    @Test
-    public void testPoll() throws Exception {
-        super.testPoll();
-    }
-
-    @Ignore(value = "Not implemented")
-    @Override
-    @Test
-    public void testSeekAndPoll() throws Exception {
-        super.testSeekAndPoll();
-    }
-
-    @Ignore(value = "Not implemented")
-    @Override
-    @Test
-    public void testFetchBoundaryOffsets() throws PartitionConsumerException, ExecutionException, InterruptedException {
-        super.testFetchBoundaryOffsets();
-    }
-
-    @Ignore(value = "Not implemented")
-    @Override
-    @Test
-    public void testPollTailing() throws Exception {
-        super.testPollTailing();
-    }
 }

@@ -4,6 +4,8 @@ import net.researchgate.kafka.metamorph.PartitionConsumer;
 import net.researchgate.kafka.metamorph.PartitionConsumerRecord;
 import net.researchgate.kafka.metamorph.TopicPartition;
 import net.researchgate.kafka.metamorph.exceptions.PartitionConsumerException;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.PartitionInfo;
@@ -13,7 +15,7 @@ import java.util.*;
 
 public class Kafka09PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
 
-    private TopicPartition assignedPartition;
+    private org.apache.kafka.common.TopicPartition assignedKafkaPartition;
     private final KafkaConsumer<K,V> consumer;
 
     public Kafka09PartitionConsumer(Properties properties, Deserializer<K> keyDeserializer, Deserializer<V> valueDeserializer) {
@@ -37,41 +39,71 @@ public class Kafka09PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     public void assign(TopicPartition partition) throws PartitionConsumerException {
         try {
             List<org.apache.kafka.common.TopicPartition> partitions = new ArrayList<>();
-            partitions.add(new org.apache.kafka.common.TopicPartition(partition.topic(), partition.partition()));
+            assignedKafkaPartition = new org.apache.kafka.common.TopicPartition(partition.topic(), partition.partition());
+            partitions.add(assignedKafkaPartition);
             consumer.assign(partitions);
         } catch (KafkaException e) {
             throw new PartitionConsumerException(e);
         }
-        assignedPartition = partition;
     }
 
     @Override
     public List<PartitionConsumerRecord<K, V>> poll(int timeout) throws PartitionConsumerException {
-        return null;
+        ensureAssigned();
+        ConsumerRecords<K, V> consumerRecords = consumer.poll(timeout);
+        List<PartitionConsumerRecord<K, V>> records = new ArrayList<>();
+        for (ConsumerRecord<K, V> consumerRecord: consumerRecords) {
+            records.add(new PartitionConsumerRecord<>(
+                    consumerRecord.topic(),
+                    consumerRecord.partition(),
+                    consumerRecord.key(),
+                    consumerRecord.value(),
+                    consumerRecord.offset()));
+        }
+        return records;
     }
 
     @Override
     public long position() throws PartitionConsumerException {
-        return 0;
+        ensureAssigned();
+        return consumer.position(assignedKafkaPartition);
     }
 
     @Override
     public long earliestPosition() throws PartitionConsumerException {
-        return 0;
+        ensureAssigned();
+        long currentPosition = consumer.position(assignedKafkaPartition);
+        consumer.seekToBeginning(assignedKafkaPartition);
+        long earliestPosition = consumer.position(assignedKafkaPartition);
+        consumer.seek(assignedKafkaPartition, currentPosition);
+        return earliestPosition;
     }
 
     @Override
     public long latestPosition() throws PartitionConsumerException {
-        return 0;
+        ensureAssigned();
+        long currentPosition = consumer.position(assignedKafkaPartition);
+        consumer.seekToEnd(assignedKafkaPartition);
+        long latestPosition = consumer.position(assignedKafkaPartition);
+        consumer.seek(assignedKafkaPartition, currentPosition);
+        return latestPosition;
     }
 
     @Override
     public void seek(long offset) throws PartitionConsumerException {
-
+        ensureAssigned();
+        consumer.seek(assignedKafkaPartition, offset);
     }
 
     @Override
     public void close() {
         consumer.close();
+    }
+
+    private void ensureAssigned() {
+        // TODO: probably this method is not needed with kafka 9
+        if (assignedKafkaPartition == null || consumer.assignment().isEmpty()) {
+            throw new IllegalStateException("Consumer is not assigned to any partitions.");
+        }
     }
 }

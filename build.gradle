@@ -77,10 +77,10 @@ subprojects {
 project(':metamorph-kafka-08') {
     dependencies {
         compile project(':metamorph-common')
-        compile 'org.apache.kafka:kafka_2.10:0.8.2.2'
+        compile 'org.apache.kafka:kafka_2.11:0.8.2.2'
 
         testCompile project(path: ':metamorph-common', configuration: 'testArtifacts')
-        testCompile 'org.apache.kafka:kafka_2.10:0.8.2.2:test'
+        testCompile 'org.apache.kafka:kafka_2.11:0.8.2.2:test'
         testCompile 'org.apache.kafka:kafka-clients:0.8.2.2'
     }
 }
@@ -88,10 +88,14 @@ project(':metamorph-kafka-08') {
 project(':metamorph-kafka-09') {
     dependencies {
         compile project(':metamorph-common')
-        compile 'org.apache.kafka:kafka_2.10:0.9.0.1'
+        compile 'org.apache.kafka:kafka_2.11:0.9.0.1'
 
         testCompile project(path: ':metamorph-common', configuration: 'testArtifacts')
-        testCompile 'org.apache.kafka:kafka_2.10:0.9.0.1:test'
+
+        testCompile 'info.batey.kafka:kafka-unit:0.4'
+
+        testCompile 'org.apache.kafka:kafka_2.11:0.9.0.1'
+        testCompile 'org.apache.kafka:kafka_2.11:0.9.0.1:test'
         testCompile 'org.apache.kafka:kafka-clients:0.9.0.1'
     }
 }

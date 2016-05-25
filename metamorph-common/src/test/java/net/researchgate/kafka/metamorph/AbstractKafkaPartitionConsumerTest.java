@@ -7,9 +7,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import static junit.framework.TestCase.fail;
 
 public abstract class AbstractKafkaPartitionConsumerTest {
 
@@ -33,7 +36,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         context.close();
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void testPartitionDiscoveryOnePartition() throws PartitionConsumerException {
         final String topic = "test-topic";
         context.createTopic(topic, 1);
@@ -45,7 +48,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         Assert.assertEquals(0, ((TopicPartition) partitions.toArray()[0]).partition());
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void testPartitionDiscoveryMultiplePartitions() throws PartitionConsumerException {
         final String topic = "test_topic";
         context.createTopic(topic, 10);
@@ -58,7 +61,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         Assert.assertTrue(partitions.contains(new TopicPartition(topic, 9)));
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void testFetchEmptyBoundaryOffsets() throws PartitionConsumerException {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
@@ -71,7 +74,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         Assert.assertEquals(0L, consumer.latestPosition());
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void testFetchBoundaryOffsets() throws PartitionConsumerException, ExecutionException, InterruptedException {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
@@ -86,7 +89,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         Assert.assertEquals(5L, consumer.latestPosition());
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void testPoll() throws Exception {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
@@ -96,8 +99,17 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         PartitionConsumer<String, String> consumer = initializeUnitUnderTest();
 
         consumer.assign(new TopicPartition(topic, 0));
+        consumer.seek(consumer.earliestPosition());
 
-        List<PartitionConsumerRecord<String,String>> records = consumer.poll(0);
+        long latestOffset = consumer.latestPosition();
+        Assert.assertEquals(5, latestOffset);
+        Assert.assertEquals(0, consumer.position());
+
+        List<PartitionConsumerRecord<String,String>> records = new ArrayList<>();
+        while (consumer.position() < latestOffset) {
+            records.addAll(consumer.poll(10));
+        }
+
         Assert.assertEquals(5, records.size());
         for (int i = 0; i < 5; i++) {
             Assert.assertEquals(i, records.get(i).offset());
@@ -108,7 +120,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         }
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void testSeekAndPoll() throws Exception {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
@@ -119,24 +131,33 @@ public abstract class AbstractKafkaPartitionConsumerTest {
 
         consumer.assign(new TopicPartition(topic, 0));
 
-        List<PartitionConsumerRecord<String,String>> records;
+        List<PartitionConsumerRecord<String,String>> records = new ArrayList<>();
+
+        long latestOffset = consumer.latestPosition();
+        Assert.assertTrue(latestOffset > 50);
 
         consumer.seek(50);
-        records = consumer.poll(0);
+        while (consumer.position() < latestOffset) {
+            records.addAll(consumer.poll(10));
+        }
         Assert.assertEquals(50, records.size());
         Assert.assertEquals(50, records.get(0).offset());
 
         consumer.seek(consumer.earliestPosition());
-        records = consumer.poll(0);
+        records = new ArrayList<>();
+        while (consumer.position() < latestOffset) {
+            records.addAll(consumer.poll(10));
+        }
         Assert.assertEquals(100, records.size());
         Assert.assertEquals(0, records.get(0).offset());
 
         consumer.seek(consumer.latestPosition());
-        records = consumer.poll(0);
+        records = consumer.poll(10);
         Assert.assertEquals(0, records.size());
     }
 
-    @Test
+    // TODO: This test uses kafka 8 batch size specifics, needs to be re-written.
+    @Test(timeout = 10000)
     public void testPollBatched() throws Exception {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
@@ -146,22 +167,23 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         PartitionConsumer<String, String> consumer = initializeUnitUnderTest();
 
         consumer.assign(new TopicPartition(topic, 0));
-        List<PartitionConsumerRecord<String,String>> records = consumer.poll(0);
+        List<PartitionConsumerRecord<String,String>> records = consumer.poll(10);
+        Assert.assertNotEquals(0, records.size());
         Assert.assertEquals(0L, records.get(0).offset());
         Assert.assertEquals(1359, records.get(records.size() - 1).offset());
         long offset = 1359;
         while (offset < 6707) {
-            records = consumer.poll(0);
+            records = consumer.poll(10);
             Assert.assertEquals(offset + 1, records.get(0).offset());
             Assert.assertEquals(offset + 1337, records.get(records.size() - 1).offset());
             offset += 1337;
         }
-        records = consumer.poll(0);
+        records = consumer.poll(10);
         Assert.assertEquals(6708, records.get(0).offset());
         Assert.assertEquals(6999, records.get(records.size() - 1).offset());
     }
 
-    @Test
+    @Test(timeout = 11000)
     public void testPollTailing() throws Exception {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
@@ -169,7 +191,6 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         Thread producerThread = new Thread() {
             public void run() {
                 try {
-                    Thread.sleep(10);
                     produceMessagesUnordered(topic, 500);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -182,11 +203,26 @@ public abstract class AbstractKafkaPartitionConsumerTest {
 
         consumer.assign(new TopicPartition(topic, 0));
 
-        List<PartitionConsumerRecord<String,String>> records = consumer.poll(10);
+        List<PartitionConsumerRecord<String,String>> records;
+        records = consumer.poll(10);
         Assert.assertEquals(0, records.size());
 
         producerThread.start();
-        records = consumer.poll(300);
+
+        // This code tries to emulate 'tailing' behavior.
+        // In usual use-case you would do this in a different fashion
+        // Here we just want to ensure that the same consumer is able to fetch newly written data
+        records = new ArrayList<>();
+        long start = System.currentTimeMillis();
+        while (!Thread.interrupted()) {
+            records.addAll(consumer.poll(10));
+            if (records.size() == 500) {
+                break;
+            }
+            if (System.currentTimeMillis() - start > 1000 * 10) {
+                fail("Unable to consume topic within 10 seconds");
+            }
+        }
         producerThread.join();
 
         Assert.assertEquals(500, records.size());
