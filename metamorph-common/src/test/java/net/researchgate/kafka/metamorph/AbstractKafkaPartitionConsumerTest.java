@@ -36,7 +36,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         context.close();
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = 5000)
     public void testPartitionDiscoveryOnePartition() throws PartitionConsumerException {
         final String topic = "test-topic";
         context.createTopic(topic, 1);
@@ -48,7 +48,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         Assert.assertEquals(0, ((TopicPartition) partitions.toArray()[0]).partition());
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = 5000)
     public void testPartitionDiscoveryMultiplePartitions() throws PartitionConsumerException {
         final String topic = "test_topic";
         context.createTopic(topic, 10);
@@ -61,7 +61,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         Assert.assertTrue(partitions.contains(new TopicPartition(topic, 9)));
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = 5000)
     public void testFetchEmptyBoundaryOffsets() throws PartitionConsumerException {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
@@ -74,7 +74,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         Assert.assertEquals(0L, consumer.latestPosition());
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = 5000)
     public void testFetchBoundaryOffsets() throws PartitionConsumerException, ExecutionException, InterruptedException {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
@@ -89,7 +89,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         Assert.assertEquals(5L, consumer.latestPosition());
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = 5000)
     public void testPoll() throws Exception {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
@@ -120,7 +120,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         }
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = 5000)
     public void testSeekAndPoll() throws Exception {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
@@ -157,7 +157,7 @@ public abstract class AbstractKafkaPartitionConsumerTest {
     }
 
     // TODO: This test uses kafka 8 batch size specifics, needs to be re-written.
-    @Test(timeout = 10000)
+    @Test(timeout = 5000)
     public void testPollBatched() throws Exception {
         final String topic = "test_topic";
         context.createTopic(topic, 1);
@@ -183,8 +183,9 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         Assert.assertEquals(6999, records.get(records.size() - 1).offset());
     }
 
-    @Test(timeout = 11000)
+    @Test(timeout = 5000)
     public void testPollTailing() throws Exception {
+        final int maxWaitInMillis = 500;
         final String topic = "test_topic";
         context.createTopic(topic, 1);
 
@@ -219,8 +220,8 @@ public abstract class AbstractKafkaPartitionConsumerTest {
             if (records.size() == 500) {
                 break;
             }
-            if (System.currentTimeMillis() - start > 1000 * 10) {
-                fail("Unable to consume topic within 10 seconds");
+            if (System.currentTimeMillis() - start > maxWaitInMillis) {
+                fail(String.format("Unable to consume topic within %d millis", maxWaitInMillis));
             }
         }
         producerThread.join();
