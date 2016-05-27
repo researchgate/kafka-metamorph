@@ -61,6 +61,15 @@ public abstract class AbstractKafkaPartitionConsumerTest {
         Assert.assertTrue(partitions.contains(new TopicPartition(topic, 9)));
     }
 
+    @Test(timeout = 5000, expected = IllegalStateException.class)
+    public void testIllegalOperationWithoutAssignedPartition() throws PartitionConsumerException {
+        final String topic = "test_topic";
+        context.createTopic(topic, 1);
+
+        PartitionConsumer<String, String> consumer = initializeUnitUnderTest();
+        consumer.poll(100);
+    }
+
     @Test(timeout = 5000)
     public void testFetchEmptyBoundaryOffsets() throws PartitionConsumerException {
         final String topic = "test_topic";

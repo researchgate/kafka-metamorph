@@ -101,7 +101,6 @@ public class Kafka09PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     private void ensureAssigned() {
-        // TODO: probably this method is not needed with kafka 9
         if (assignedKafkaPartition == null || consumer.assignment().isEmpty()) {
             throw new IllegalStateException("Consumer is not assigned to any partitions.");
         }
