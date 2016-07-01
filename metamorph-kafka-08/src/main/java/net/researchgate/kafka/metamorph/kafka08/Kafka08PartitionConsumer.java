@@ -10,6 +10,7 @@ import kafka.javaapi.*;
 import kafka.javaapi.consumer.SimpleConsumer;
 import kafka.javaapi.message.ByteBufferMessageSet;
 import kafka.message.MessageAndOffset;
+import kafka.network.BlockingChannel;
 import kafka.serializer.Decoder;
 import net.researchgate.kafka.metamorph.KafkaNode;
 import net.researchgate.kafka.metamorph.PartitionConsumer;
@@ -206,6 +207,6 @@ public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     private SimpleConsumer createConsumer(KafkaNode node) {
-        return new SimpleConsumer(node.host(), node.port(), consumerConfig.socketTimeoutMs(), consumerConfig.bufferSize(), generateClientId());
+        return new SimpleConsumer(node.host(), node.port(), consumerConfig.socketTimeoutMs(), BlockingChannel.UseDefaultBufferSize(), generateClientId());
     }
 }
