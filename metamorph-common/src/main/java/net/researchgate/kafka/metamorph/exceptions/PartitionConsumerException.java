@@ -3,7 +3,7 @@ package net.researchgate.kafka.metamorph.exceptions;
 /**
  * Base class of all consumer exceptions
  */
-public class PartitionConsumerException extends Exception {
+public class PartitionConsumerException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
