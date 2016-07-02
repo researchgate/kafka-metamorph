@@ -22,10 +22,10 @@ import net.researchgate.kafka.metamorph.kafka08.exceptions.PartitionNotAvailable
 
 import java.util.*;
 
-public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
+public class Kafka08PartitionConsumer<K, V> implements PartitionConsumer<K, V> {
 
     private final Kafka08PartitionConsumerConfig consumerConfig;
-    private final PartitionConsumerRecordTransformer<K,V> recordTransformer;
+    private final PartitionConsumerRecordTransformer<K, V> recordTransformer;
 
     private SimpleConsumer partitionConsumer;
     private TopicPartition assignedTopicPartition;
@@ -38,7 +38,7 @@ public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     @Override
-    public Collection<TopicPartition> partitionsFor(String topic) throws PartitionConsumerException {
+    public Collection<TopicPartition> partitionsFor(String topic) {
         List<TopicMetadata> topicMetadataList = getTopicMetadataFromBroker(consumerConfig.bootstrapNodes(), topic);
         final Set<TopicPartition> partitions = new HashSet<>();
 
@@ -52,19 +52,19 @@ public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     @Override
-    public void assign(TopicPartition partition) throws PartitionConsumerException {
+    public void assign(TopicPartition partition) {
         assignedTopicPartition = partition;
         reinitializePartitionConsumer();
     }
 
     @Override
-    public List<PartitionConsumerRecord<K, V>> poll(int timeout) throws PartitionConsumerException {
+    public List<PartitionConsumerRecord<K, V>> poll(int timeout) {
         ensureAssignedAndNotClosed();
         ByteBufferMessageSet messageSet = getMessageSetSince(fetchOffset, timeout);
-        List<PartitionConsumerRecord<K,V>> records = new ArrayList<>();
+        List<PartitionConsumerRecord<K, V>> records = new ArrayList<>();
         for (MessageAndOffset messageAndOffset : messageSet) {
             // @todo handle serialization errors properly
-            PartitionConsumerRecord<K,V> record = recordTransformer.transform(assignedTopicPartition, messageAndOffset);
+            PartitionConsumerRecord<K, V> record = recordTransformer.transform(assignedTopicPartition, messageAndOffset);
             records.add(record);
             fetchOffset = Math.max(messageAndOffset.nextOffset(), fetchOffset);
         }
@@ -72,25 +72,25 @@ public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     @Override
-    public long position() throws PartitionConsumerException {
+    public long position() {
         ensureAssignedAndNotClosed();
         return fetchOffset;
     }
 
     @Override
-    public long earliestPosition() throws PartitionConsumerException {
+    public long earliestPosition() {
         ensureAssignedAndNotClosed();
         return getOffsetForPartition(kafka.api.OffsetRequest.EarliestTime());
     }
 
     @Override
-    public long latestPosition() throws PartitionConsumerException {
+    public long latestPosition() {
         ensureAssignedAndNotClosed();
         return getOffsetForPartition(kafka.api.OffsetRequest.LatestTime());
     }
 
     @Override
-    public void seek(long offset) throws PartitionConsumerException {
+    public void seek(long offset) {
         ensureAssignedAndNotClosed();
         if (offset < 0) {
             throw new IndexOutOfBoundsException(String.format("Negative offsets are disallowed, offset given: %d", offset));
@@ -120,7 +120,7 @@ public class Kafka08PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
         partitionConsumer = createConsumer(getPartitionLeader(consumerConfig.bootstrapNodes(), assignedTopicPartition.topic(), assignedTopicPartition.partition()));
     }
 
-    private ByteBufferMessageSet getMessageSetSince(long offset, int timeoutInMs) throws PartitionConsumerException {
+    private ByteBufferMessageSet getMessageSetSince(long offset, int timeoutInMs)  {
         if (timeoutInMs < 0) {
             throw new IllegalArgumentException(String.format("Timeout must not lower than 0, timeout is: %d", timeoutInMs));
         }

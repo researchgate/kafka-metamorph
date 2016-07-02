@@ -23,7 +23,7 @@ public class Kafka09PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     @Override
-    public Collection<TopicPartition> partitionsFor(String topic) throws PartitionConsumerException {
+    public Collection<TopicPartition> partitionsFor(String topic)  {
         try {
             Collection<TopicPartition> partitions = new HashSet<>();
             for (PartitionInfo partitionInfo : consumer.partitionsFor(topic)) {
@@ -36,7 +36,7 @@ public class Kafka09PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     @Override
-    public void assign(TopicPartition partition) throws PartitionConsumerException {
+    public void assign(TopicPartition partition) {
         try {
             List<org.apache.kafka.common.TopicPartition> partitions = new ArrayList<>();
             assignedKafkaPartition = new org.apache.kafka.common.TopicPartition(partition.topic(), partition.partition());
@@ -48,7 +48,7 @@ public class Kafka09PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     @Override
-    public List<PartitionConsumerRecord<K, V>> poll(int timeout) throws PartitionConsumerException {
+    public List<PartitionConsumerRecord<K, V>> poll(int timeout)  {
         ensureAssigned();
         ConsumerRecords<K, V> consumerRecords = consumer.poll(timeout);
         List<PartitionConsumerRecord<K, V>> records = new ArrayList<>();
@@ -64,13 +64,13 @@ public class Kafka09PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     @Override
-    public long position() throws PartitionConsumerException {
+    public long position() {
         ensureAssigned();
         return consumer.position(assignedKafkaPartition);
     }
 
     @Override
-    public long earliestPosition() throws PartitionConsumerException {
+    public long earliestPosition() {
         ensureAssigned();
         long currentPosition = consumer.position(assignedKafkaPartition);
         consumer.seekToBeginning(assignedKafkaPartition);
@@ -80,7 +80,7 @@ public class Kafka09PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     @Override
-    public long latestPosition() throws PartitionConsumerException {
+    public long latestPosition()  {
         ensureAssigned();
         long currentPosition = consumer.position(assignedKafkaPartition);
         consumer.seekToEnd(assignedKafkaPartition);
@@ -90,7 +90,7 @@ public class Kafka09PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     @Override
-    public void seek(long offset) throws PartitionConsumerException {
+    public void seek(long offset)  {
         ensureAssigned();
         consumer.seek(assignedKafkaPartition, offset);
     }
