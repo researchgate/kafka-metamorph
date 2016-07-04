@@ -31,7 +31,7 @@ public interface PartitionConsumer<K, V> extends Closeable {
      *
      * @throws PartitionConsumerException when an unrecoverable error occurs (e.g. no broker available)
      */
-    Collection<TopicPartition> partitionsFor(String topic) throws PartitionConsumerException;
+    Collection<TopicPartition> partitionsFor(String topic);
 
     /**
      * Manually assign a partition to this consumer. This interface allows to bind to only one partition at a time.
@@ -40,7 +40,7 @@ public interface PartitionConsumer<K, V> extends Closeable {
      *
      * @throws PartitionConsumerException when an unrecoverable error occurs (e.g. no broker available)
      */
-    void assign(TopicPartition partition) throws PartitionConsumerException;
+    void assign(TopicPartition partition);
 
     /**
      * Fetch data for the assigned partition. It is an error if the consumer is not assigned to any partition before polling.
@@ -56,7 +56,7 @@ public interface PartitionConsumer<K, V> extends Closeable {
      *
      * @throws PartitionConsumerException when an unrecoverable error occurs (e.g. no broker available)
      */
-    List<PartitionConsumerRecord<K, V>> poll(int timeout) throws PartitionConsumerException;
+    List<PartitionConsumerRecord<K, V>> poll(int timeout);
 
     /**
      * Get the offset of the next record that will be fetched for the assigned partition (if a record with that offset exists).
@@ -67,7 +67,7 @@ public interface PartitionConsumer<K, V> extends Closeable {
      *
      * @throws PartitionConsumerException when an unrecoverable error occurs (e.g. no broker available)
      */
-    long position() throws PartitionConsumerException;
+    long position();
 
     /**
      * Get the earliest offset for the assigned partition
@@ -78,7 +78,7 @@ public interface PartitionConsumer<K, V> extends Closeable {
      *
      * @throws PartitionConsumerException when an unrecoverable error occurs (e.g. no broker available)
      */
-    long earliestPosition() throws PartitionConsumerException;
+    long earliestPosition();
 
     /**
      * Get the latest offset for the assigned partition
@@ -89,7 +89,7 @@ public interface PartitionConsumer<K, V> extends Closeable {
      *
      * @throws PartitionConsumerException when an unrecoverable error occurs (e.g. no broker available)
      */
-    long latestPosition() throws PartitionConsumerException;
+    long latestPosition();
 
     /**
      * Explicitly sets the fetch offset which will be used on the next {@link #poll(int) poll(timeout)}
@@ -100,7 +100,7 @@ public interface PartitionConsumer<K, V> extends Closeable {
      *
      * @throws PartitionConsumerException when an unrecoverable error occurs (e.g. no broker available)
      */
-    void seek(long offset) throws PartitionConsumerException;
+    void seek(long offset);
 
     /**
      * Close the consumer
