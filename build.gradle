@@ -21,8 +21,8 @@ subprojects {
     apply plugin: 'maven'
     apply plugin: 'com.jfrog.bintray'
 
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
     repositories {
         jcenter()
@@ -99,6 +99,22 @@ project(':metamorph-kafka-09') {
         testCompile 'org.apache.kafka:kafka-clients:0.9.0.1'
     }
 }
+
+project(':metamorph-kafka-010') {
+    dependencies {
+        compile project(':metamorph-common')
+        compile 'org.apache.kafka:kafka_2.11:0.10.0.1'
+
+        testCompile project(path: ':metamorph-common', configuration: 'testArtifacts')
+
+        testCompile 'info.batey.kafka:kafka-unit:0.4'
+
+        testCompile 'org.apache.kafka:kafka_2.11:0.10.0.1'
+        testCompile 'org.apache.kafka:kafka_2.11:0.10.0.1:test'
+        testCompile 'org.apache.kafka:kafka-clients:0.10.0.1'
+    }
+}
+
 
 task build {}
 
