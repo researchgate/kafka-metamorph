@@ -209,4 +209,10 @@ public class Kafka08PartitionConsumer<K, V> implements PartitionConsumer<K, V> {
     private SimpleConsumer createConsumer(KafkaNode node) {
         return new SimpleConsumer(node.host(), node.port(), consumerConfig.socketTimeoutMs(), BlockingChannel.UseDefaultBufferSize(), generateClientId());
     }
+
+    public static <K, V> PartitionConsumer<K, V> create(Properties properties, Object keyDecoder, Object valueDecoder) {
+        Kafka08PartitionConsumerConfig config = new Kafka08PartitionConsumerConfig.Builder().bootstrapServers(properties.getProperty("bootstrap.servers")).build();
+        // TODO: check instances, cast with K and V, avoid property name hardcoding
+        return new Kafka08PartitionConsumer<K, V>(config, (Decoder) keyDecoder, (Decoder) valueDecoder);
+    }
 }
