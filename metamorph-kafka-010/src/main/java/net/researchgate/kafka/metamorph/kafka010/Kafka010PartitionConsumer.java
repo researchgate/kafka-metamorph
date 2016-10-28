@@ -52,6 +52,15 @@ public class Kafka010PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
     }
 
     @Override
+    public TopicPartition getAssignment() {
+        if (assignedKafkaPartition == null) {
+            return null;
+        } else {
+            return new TopicPartition(assignedKafkaPartition.topic(), assignedKafkaPartition.partition());
+        }
+    }
+
+    @Override
     public List<PartitionConsumerRecord<K, V>> poll(int timeout)  {
         ensureAssigned();
         ConsumerRecords<K, V> consumerRecords = consumer.poll(timeout);
