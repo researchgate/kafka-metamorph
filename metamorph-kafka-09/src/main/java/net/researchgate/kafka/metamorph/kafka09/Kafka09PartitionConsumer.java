@@ -22,6 +22,10 @@ public class Kafka09PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
         consumer = new KafkaConsumer<K, V>(properties, keyDeserializer, valueDeserializer);
     }
 
+    public Kafka09PartitionConsumer(Properties properties) {
+        consumer = new KafkaConsumer<K, V>(properties);
+    }
+
     @Override
     public Collection<TopicPartition> partitionsFor(String topic)  {
         try {
