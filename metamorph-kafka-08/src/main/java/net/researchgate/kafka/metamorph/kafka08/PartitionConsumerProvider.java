@@ -14,7 +14,7 @@ public class PartitionConsumerProvider implements net.researchgate.kafka.metamor
 
     public <K, V> PartitionConsumer<K, V> createConsumer(Properties properties, Object keyDeserializer, Object valueDeserializer) {
         Kafka08PartitionConsumerConfig config = getConfigFromProperties(properties);
-        // TODO: check instances
+        // TODO: cast decoder/deserializer instances and re-throw exceptions with sane messages
         return new Kafka08PartitionConsumer<>(config, (Decoder<K>) keyDeserializer, (Decoder<V>) valueDeserializer);
     }
 
