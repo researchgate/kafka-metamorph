@@ -59,6 +59,11 @@ public class Kafka08PartitionConsumer<K, V> implements PartitionConsumer<K, V> {
     }
 
     @Override
+    public TopicPartition getAssignment() {
+        return assignedTopicPartition;
+    }
+
+    @Override
     public List<PartitionConsumerRecord<K, V>> poll(int timeout) {
         ensureAssignedAndNotClosed();
         ByteBufferMessageSet messageSet = getMessageSetSince(fetchOffset, timeout);

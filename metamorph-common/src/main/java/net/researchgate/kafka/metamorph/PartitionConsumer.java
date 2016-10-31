@@ -43,6 +43,14 @@ public interface PartitionConsumer<K, V> extends Closeable {
     void assign(TopicPartition partition);
 
     /**
+     * Get currently assigned topic partition
+     *
+     * @return currently assigned TopicPartition or null if there is no assignment
+     *
+     */
+    TopicPartition getAssignment();
+
+    /**
      * Fetch data for the assigned partition. It is an error if the consumer is not assigned to any partition before polling.
      * <p>
      * On each poll, consumer will try to use the last consumed offset as the starting offset and fetch sequentially. The last

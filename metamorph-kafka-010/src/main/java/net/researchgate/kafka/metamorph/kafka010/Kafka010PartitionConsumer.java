@@ -22,6 +22,10 @@ public class Kafka010PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
         consumer = new KafkaConsumer<K, V>(properties, keyDeserializer, valueDeserializer);
     }
 
+    public Kafka010PartitionConsumer(Properties properties) {
+        consumer = new KafkaConsumer<K, V>(properties);
+    }
+
     @Override
     public Collection<TopicPartition> partitionsFor(String topic)  {
         try {
@@ -44,6 +48,15 @@ public class Kafka010PartitionConsumer<K,V> implements PartitionConsumer<K,V> {
             consumer.assign(partitions);
         } catch (KafkaException e) {
             throw new PartitionConsumerException(e);
+        }
+    }
+
+    @Override
+    public TopicPartition getAssignment() {
+        if (assignedKafkaPartition == null) {
+            return null;
+        } else {
+            return new TopicPartition(assignedKafkaPartition.topic(), assignedKafkaPartition.partition());
         }
     }
 
