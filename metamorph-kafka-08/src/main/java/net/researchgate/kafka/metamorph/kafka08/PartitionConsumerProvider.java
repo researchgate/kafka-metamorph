@@ -66,9 +66,22 @@ public class PartitionConsumerProvider implements net.researchgate.kafka.metamor
         }
     }
 
+    private static ClassLoader getKafkaClassLoader() {
+        return PartitionConsumerProvider.class.getClassLoader();
+    }
+
+    private static ClassLoader getContextOrKafkaClassLoader() {
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        if (cl == null)
+            return getKafkaClassLoader();
+        else
+            return cl;
+    }
+
     private Class<?> getClass(String key) {
         try {
-            return Class.forName(key, true, ClassLoader.getSystemClassLoader());
+            ClassLoader classLoader = getContextOrKafkaClassLoader();
+            return Class.forName(key, true, classLoader);
         } catch (ClassNotFoundException e) {
             throw new PartitionConsumerException("Class not found", e);
         }
